@@ -16,16 +16,15 @@
 
 #define FLASH_COUNT 3
 
-int main(void)
-{
-    cli();
+int main(void) {
 
-    gpio_init();
-   	lcd_init();
-   	uart_init();
+	cli();
 
-    sei();
+	gpio_init();
+	lcd_init();
+	uart_init();
 
+	sei();
 
 	for (;;) {
 		for (int i = 0; i < FLASH_COUNT; ++i) {
