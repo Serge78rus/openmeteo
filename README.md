@@ -7,4 +7,4 @@ temperature, relative humidity and atmospheric pressure.
 Project in early development state
 
 # Site
-[Web page](http://serge78rus.github.io/hello-world/)
+[Web page](http://serge78rus.github.io/openmeteo/)
