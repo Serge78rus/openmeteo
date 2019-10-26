@@ -2,7 +2,8 @@
  * lcd.c
  *
  *  Created on: 25 окт. 2019 г.
- *      Author: serge78rus
+ *  Author: serge78rus
+ *  License GPL-3.0
  */
 
 #include <stdint.h>

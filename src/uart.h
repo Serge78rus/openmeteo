@@ -2,7 +2,8 @@
  * uart.h
  *
  *  Created on: 24 окт. 2019 г.
- *      Author: serge78rus
+ *  Author: serge78rus
+ *  License GPL-3.0
  */
 
 #ifndef UART_H_
