@@ -5,15 +5,26 @@
  *      Author: serge78rus
  */
 
+#include <avr/io.h>
+//#include <avr/interrupt.h>
 #include <util/delay.h>
+#include <util/atomic.h>
 
 #include "gpio.h"
+#include "lcd.h"
+#include "uart.h"
 
 #define FLASH_COUNT 3
 
 int main(void)
 {
-	gpio_init();
+    cli();
+
+    gpio_init();
+   	lcd_init();
+   	uart_init();
+
+    sei();
 
 
 	for (;;) {
