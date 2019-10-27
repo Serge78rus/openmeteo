@@ -11,6 +11,7 @@
 
 #include <avr/io.h>
 #include <avr/wdt.h>
+#include <avr/pgmspace.h>
 //#include <avr/interrupt.h>
 #include <util/delay.h>
 #include <util/atomic.h>
@@ -65,10 +66,13 @@ int main(void) {
 
 static inline void show_logo(void)
 {
+	static const char TITLE_STR[] PROGMEM = "* OpenMETEO *";
+	static const char VERSION_STR[] PROGMEM = "version %02X.%02X";
+
 	lcd_move_cursor(1, 0);
-	fprintf(&lcd, "* OpenMETEO *");
+	fprintf_P(&lcd, TITLE_STR);
 	lcd_move_cursor(1, 1);
-	fprintf(&lcd, "version %02X.%02X", VERSION >> 8, VERSION & 0xff);
+	fprintf_P(&lcd, VERSION_STR, VERSION >> 8, VERSION & 0xff);
 }
 
 static void cycle(void)
