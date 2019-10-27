@@ -17,6 +17,7 @@
 #include "lcd.h"
 #include "gpio.h"
 #include "uart.h"
+#include "tim1.h"
 
 #define FLASH_COUNT 3
 
@@ -31,6 +32,7 @@ int main(void) {
 
 	gpio_init();
 	uart_init();
+	tim1_init();
 
 	sei();
 
