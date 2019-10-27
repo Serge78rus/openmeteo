@@ -12,6 +12,7 @@
 #include <avr/io.h>
 #include <avr/wdt.h>
 #include <avr/pgmspace.h>
+#include <avr/sleep.h>
 //#include <avr/interrupt.h>
 #include <util/delay.h>
 #include <util/atomic.h>
@@ -40,6 +41,10 @@ int main(void) {
 	uart_init();
 	tim1_init();
 
+#ifdef USE_SLEEP
+	set_sleep_mode(SLEEP_MODE_IDLE);
+#endif
+
 	sei();
 
 	_delay_ms(LOGO_DELAY_MS);
@@ -50,15 +55,22 @@ int main(void) {
 	for (;;) {
 		if (tim1_flag) {
 			tim1_flag = 0;
+
 #ifdef USE_WDT
 			wdt_reset();
 #endif
+
 			if (++sec_count == CYCLE_S) {
 				sec_count = 0;
 				cycle();
 			}
-			//slep mode
+
 		}
+
+#ifdef USE_SLEEP
+		sleep_mode();
+#endif
+
 	}
 
 	return 0;
