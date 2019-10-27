@@ -7,8 +7,10 @@
  */
 
 #include <stdio.h>
+#include <stdint.h>
 
 #include <avr/io.h>
+#include <avr/wdt.h>
 //#include <avr/interrupt.h>
 #include <util/delay.h>
 #include <util/atomic.h>
@@ -19,11 +21,14 @@
 #include "uart.h"
 #include "tim1.h"
 
-#define FLASH_COUNT 3
 
 static inline void show_logo(void);
+static void cycle(void);
 
 int main(void) {
+#ifdef USE_WDT
+	wdt_enable(WDTO_8S);
+#endif
 
 	cli();
 
@@ -36,16 +41,23 @@ int main(void) {
 
 	sei();
 
+	_delay_ms(LOGO_DELAY_MS);
+	lcd_clear();
+	cycle();
+
+	static uint8_t sec_count = 0;
 	for (;;) {
-		for (int i = 0; i < FLASH_COUNT; ++i) {
-			if (i) {
-				_delay_ms(200);
+		if (tim1_flag) {
+			tim1_flag = 0;
+#ifdef USE_WDT
+			wdt_reset();
+#endif
+			if (++sec_count == CYCLE_S) {
+				sec_count = 0;
+				cycle();
 			}
-			gpio_led_on();
-			_delay_ms(100);
-			gpio_led_off();
+			//slep mode
 		}
-		_delay_ms(1000);
 	}
 
 	return 0;
@@ -59,4 +71,13 @@ static inline void show_logo(void)
 	fprintf(&lcd, "version %02X.%02X", VERSION >> 8, VERSION & 0xff);
 }
 
+static void cycle(void)
+{
+	//todo stub
+	static int cnt = 0;
+	lcd_move_cursor(0, 0);
+	fprintf(&lcd, "cycle: %i", cnt);
+	fprintf(&uart, "cycle: %i\r\n", cnt);
+	++cnt;
+}
 
