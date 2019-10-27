@@ -17,6 +17,7 @@
 #include <util/delay.h>
 #include <util/atomic.h>
 
+#include "debug.h"
 #include "def.h"
 #include "lcd.h"
 #include "gpio.h"
@@ -46,6 +47,8 @@ int main(void) {
 #endif
 
 	sei();
+
+	TRACEF("%s", "start");
 
 	_delay_ms(LOGO_DELAY_MS);
 	lcd_clear();
@@ -89,11 +92,13 @@ static inline void show_logo(void)
 
 static void cycle(void)
 {
+	TRACEF("%s", "cycle");
+
 	//todo stub
 	static int cnt = 0;
 	lcd_move_cursor(0, 0);
 	fprintf(&lcd, "cycle: %i", cnt);
-	fprintf(&uart, "cycle: %i\r\n", cnt);
+	TRACEF("Cycle %i", cnt);
 	++cnt;
 }
 
