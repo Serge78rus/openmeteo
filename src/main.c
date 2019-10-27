@@ -54,7 +54,7 @@ int main(void) {
 	static uint8_t sec_count = 0;
 	for (;;) {
 		if (tim1_flag) {
-			tim1_flag = 0;
+			tim1_flag = false;
 
 #ifdef USE_WDT
 			wdt_reset();

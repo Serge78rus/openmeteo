@@ -9,7 +9,7 @@
 #ifndef TIM1_H_
 #define TIM1_H_
 
-#include <stdint.h>
+#include <stdbool.h>
 
 /*
  * Use timer 1 for generate 1s interrupt
@@ -17,6 +17,6 @@
 
 void tim1_init(void);
 
-extern volatile uint8_t tim1_flag;
+extern volatile bool tim1_flag;
 
 #endif /* TIM1_H_ */

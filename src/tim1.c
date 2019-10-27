@@ -20,7 +20,7 @@
 #error "Unsupported F_CPU value"
 #endif
 
-volatile uint8_t tim1_flag = 0;
+volatile bool tim1_flag = false;
 
 void tim1_init(void)
 {
@@ -56,7 +56,7 @@ void tim1_init(void)
 
 ISR(TIMER1_COMPA_vect)
 {
-	tim1_flag = 1;
+	tim1_flag = true;
 }
 
 
