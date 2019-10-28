@@ -138,7 +138,7 @@ bool am2301_update(void)
 
 ISR(INT0_vect)
 {
-	if (!(PIND & (1 << am2301_BIT))) {
+	if (!(PIND & (1 << am2301_BIT))) { //falling edge
 		duration = TCNT2;
 	}
 	TCNT2 = 0;
