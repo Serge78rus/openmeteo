@@ -72,7 +72,7 @@ bool am2301_update(void)
 	EIMSK = (1 << INT0); // INT0: External Interrupt Request 0 Enable (enable)
 
 	TIFR2 = (1 << TOV2); // TOV2: Timer/Counter2 Overflow Flag (write 1 - clear flag)
-	TIMSK2 = (1 << TOIE2); // Timer/Counter2 Overflow Interrupt Enable
+	TIMSK2 = (1 << TOIE2); // Timer/Counter2 Overflow Interrupt Enable (enable)
 
 	//skip 2 pulse
 	while (!(duration || timeout_flag)) {
