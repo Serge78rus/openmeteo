@@ -98,8 +98,7 @@ bool am2301_update(void)
 			}
 
 			duration = 0;
-			mask >>= 1;
-		} while (mask);
+		} while (mask >>= 1);
 	}
 
 	TIMSK2 = (0 << TOIE2); // Timer/Counter2 Overflow Interrupt Enable (disable)
