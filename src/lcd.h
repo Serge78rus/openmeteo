@@ -34,6 +34,7 @@ void lcd_init(void);
 void lcd_clear(void); //after clear cursor automatic moved to home
 void lcd_home(void);
 void lcd_move_cursor(uint8_t col, uint8_t row);
+void lcd_fill_space(uint8_t cnt);
 
 extern FILE lcd;
 

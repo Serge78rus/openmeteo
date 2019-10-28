@@ -113,6 +113,13 @@ void lcd_move_cursor(uint8_t col, uint8_t row)
 	write_cmd(LCD_SETDDRAMADDR | col);
 }
 
+void lcd_fill_space(uint8_t cnt)
+{
+	while (cnt--) {
+		lcd_putchar(' ', &lcd);
+	}
+}
+
 /*
  * private functions
  */

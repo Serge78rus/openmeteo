@@ -23,7 +23,9 @@
 #include "gpio.h"
 #include "uart.h"
 #include "tim1.h"
+#include "am2301.h"
 
+#define DISPLAY_LINE_LEN 16
 
 static inline void show_logo(void);
 static void cycle(void);
@@ -41,6 +43,7 @@ int main(void) {
 	gpio_init();
 	uart_init();
 	tim1_init();
+	am2301_init();
 
 #ifdef USE_SLEEP
 	set_sleep_mode(SLEEP_MODE_IDLE);
@@ -92,13 +95,38 @@ static inline void show_logo(void)
 
 static void cycle(void)
 {
+	static const char TEMP_RH_FMT_STR[] PROGMEM = "%c%i.%01i""\xdf""C   %u.%01u%%";
+	//static const char PRESS_FMT_STR[] PROGMEM = "???";
+	static const char ERROR_STR[] PROGMEM = "Error";
+
 	TRACEF("%s", "cycle");
 
-	//todo stub
-	static int cnt = 0;
 	lcd_move_cursor(0, 0);
-	fprintf(&lcd, "cycle: %i", cnt);
-	TRACEF("Cycle %i", cnt);
-	++cnt;
+	if (am2301_update()) {
+
+		uint16_t hum = am2301_get_humidity();
+		int16_t temp = am2301_get_temp();
+		bool neg_temp = false;
+		if (temp < 0) {
+			temp = -temp;
+			neg_temp = true;
+		}
+		int len = fprintf_P(&lcd, TEMP_RH_FMT_STR,
+				neg_temp ? '-' : '+',
+				temp / 10, temp % 10,
+				hum / 10, hum % 10);
+		if (len > 0) {
+			lcd_fill_space(DISPLAY_LINE_LEN - len);
+		}
+		//todo fprintf(&uart, ...
+	} else {
+		int len = fprintf_P(&lcd, ERROR_STR);
+		lcd_fill_space(DISPLAY_LINE_LEN - len);
+		//todo fprintf(&uart, ...
+	}
+
+	//lcd_move_cursor(0, 1);
+	//todo pressure
+
 }
 
