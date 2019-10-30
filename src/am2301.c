@@ -24,6 +24,8 @@
 #error "Unsupported F_CPU value"
 #endif
 
+#define USE_TIMER_0
+//#define USE_TIMER_2
 
 uint16_t _am2301_humidity;
 int16_t _am2301_temp;
@@ -41,6 +43,18 @@ void am2301_init(void)
 			(0 << ISC01) | (1 << ISC00); // ISC01, ISC00: Interrupt Sense Control 0 Bit 1 and Bit 0
 										//(Any logical change on INT0 generates an interrupt request)
 
+#if defined USE_TIMER_0
+	//configure TIMER0
+	TCCR0A = //Timer/Counter Control Register A
+			(0 << COM0A1) | (0 << COM0A0) | // COM0A1:0: Compare Match Output A Mode
+			(0 << COM0B1) | (0 << COM0B0) | // COM0B1:0: Compare Match Output B Mode
+			(0 << WGM01) | (0 << WGM00); // WGM01:0: Waveform Generation Mode (normal mode)
+	TCCR0B = //Timer/Counter Control Register B
+			(0 << FOC0A) | // FOC0A: Force Output Compare A
+			(0 << FOC0B) | // FOC0B: Force Output Compare B
+			(0 << WGM02) | // WGM02: Waveform Generation Mode (normal mode)
+			(0 << CS02) | (1 << CS01) | (0 << CS00); // CS02:0: Clock Select (clkT2S/8 (From prescaler))
+#elif defined USE_TIMER_2
 	//configure TIMER2
 	TCCR2A = //Timer/Counter Control Register A
 			(0 << COM2A1) | (0 << COM2A0) | // COM2A1:0: Compare Match Output A Mode
@@ -51,28 +65,38 @@ void am2301_init(void)
 			(0 << FOC2B) | // FOC2B: Force Output Compare B
 			(0 << WGM22) | // WGM22: Waveform Generation Mode (normal mode)
 			(0 << CS22) | (1 << CS21) | (0 << CS20); // CS22:0: Clock Select (clkT2S/8 (From prescaler))
+#else
+#error "No timer selected"
+#endif
 }
 
 bool am2301_update(void)
 {
 	static uint8_t data[5];
 
-	//todo start timer clock
-
 	//low start pulse
 	DDRD |= (1 << am2301_BIT); //GPIO mode output (compile to atomic command)
 	_delay_us(START_PULSE_US);
 	DDRD &= ~(1 << am2301_BIT); //GPIO mode input (compile to atomic command)
 
-	timeout_flag = false;
+#if defined USE_TIMER_0
+	TCNT0 = 0;
+#elif defined USE_TIMER_2
 	TCNT2 = 0;
+#endif
 	duration = 0;
+	timeout_flag = false;
 
 	EIFR = (1 << INTF0); // INTF0: External Interrupt Flag 0 (write 1 - clear flag)
 	EIMSK = (1 << INT0); // INT0: External Interrupt Request 0 Enable (enable)
 
+#if defined USE_TIMER_0
+	TIFR0 = (1 << TOV0); // TOV0: Timer/Counter0 Overflow Flag (write 1 - clear flag)
+	TIMSK0 = (1 << TOIE0); // Timer/Counter0 Overflow Interrupt Enable
+#elif defined USE_TIMER_2
 	TIFR2 = (1 << TOV2); // TOV2: Timer/Counter2 Overflow Flag (write 1 - clear flag)
-	TIMSK2 = (1 << TOIE2); // Timer/Counter2 Overflow Interrupt Enable (enable)
+	TIMSK2 = (1 << TOIE2); // Timer/Counter2 Overflow Interrupt Enable
+#endif
 
 	//skip 2 pulse
 	while (!(duration || timeout_flag)) {
@@ -101,10 +125,12 @@ bool am2301_update(void)
 		} while (mask >>= 1);
 	}
 
+#if defined USE_TIMER_0
+	TIMSK0 = (0 << TOIE0); // Timer/Counter0 Overflow Interrupt Enable (disable)
+#elif defined USE_TIMER_2
 	TIMSK2 = (0 << TOIE2); // Timer/Counter2 Overflow Interrupt Enable (disable)
+#endif
 	EIMSK = (0 << INT0); // INT0: External Interrupt Request 0 Enable (disable)
-
-	//todo stop timer clock
 
 	/* for debug
 	for (int i = 0; i < sizeof(data) / sizeof(data[0]); ++i) {
@@ -138,14 +164,28 @@ bool am2301_update(void)
 
 ISR(INT0_vect)
 {
+#if defined USE_TIMER_0
+	if (!(PIND & (1 << am2301_BIT))) { //falling edge
+		duration = TCNT0;
+	}
+	TCNT0 = 0;
+#elif defined USE_TIMER_2
 	if (!(PIND & (1 << am2301_BIT))) { //falling edge
 		duration = TCNT2;
 	}
 	TCNT2 = 0;
+#endif
 }
 
+#if defined USE_TIMER_0
+ISR(TIMER0_OVF_vect)
+{
+	timeout_flag = true;
+}
+#elif defined USE_TIMER_2
 ISR(TIMER2_OVF_vect)
 {
 	timeout_flag = true;
 }
+#endif
 
