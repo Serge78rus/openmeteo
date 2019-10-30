@@ -24,6 +24,8 @@
 #include "uart.h"
 #include "tim1.h"
 #include "am2301.h"
+#include "twi.h"
+#include "bmp180.h"
 
 #define DISPLAY_LINE_LEN 16
 
@@ -44,6 +46,8 @@ int main(void) {
 	uart_init();
 	tim1_init();
 	am2301_init();
+	twi_init();
+	bmp180_init();
 
 #ifdef USE_SLEEP
 	set_sleep_mode(SLEEP_MODE_IDLE);
@@ -96,7 +100,7 @@ static inline void show_logo(void)
 static void cycle(void)
 {
 	static const char TEMP_RH_FMT_STR[] PROGMEM = "%c%i.%01i""\xdf""C   %u.%01u%%";
-	//static const char PRESS_FMT_STR[] PROGMEM = "???";
+	static const char PRESS_FMT_STR[] PROGMEM = "%i.%02imm";
 	static const char ERROR_STR[] PROGMEM = "Error";
 
 	TRACEF("%s", "cycle");
@@ -125,8 +129,20 @@ static void cycle(void)
 		//todo fprintf(&uart, ...
 	}
 
-	//lcd_move_cursor(0, 1);
-	//todo pressure
+	lcd_move_cursor(0, 1);
+	if (bmp180_update(bmp180_MODE_ULTRA_HIGH_RESOLUTION)) {
 
+		int32_t press = bmp180_get_press_mm();
+		int len = fprintf_P(&lcd, PRESS_FMT_STR,
+				(int)(press / 100), (int)(press % 100));
+		if (len > 0) {
+			lcd_fill_space(DISPLAY_LINE_LEN - len);
+		}
+		//todo fprintf(&uart, ...
+	} else {
+		int len = fprintf_P(&lcd, ERROR_STR);
+		lcd_fill_space(DISPLAY_LINE_LEN - len);
+		//todo fprintf(&uart, ...
+	}
 }
 
