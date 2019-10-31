@@ -99,7 +99,7 @@ static inline void show_logo(void)
 
 static void cycle(void)
 {
-	static const char TEMP_RH_FMT_STR[] PROGMEM = "%c%i.%01i""\xdf""C   %u.%01u%%";
+	static const char TEMP_RH_FMT_STR[] PROGMEM = "%c%i.%01i""\xdf""C   %3u.%01u%%";
 	static const char PRESS_FMT_STR[] PROGMEM = "%i.%02imm";
 	static const char ERROR_STR[] PROGMEM = "Error";
 
