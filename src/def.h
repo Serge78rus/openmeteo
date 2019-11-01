@@ -14,6 +14,6 @@
 //#define CYCLE_S 5/*TODO temp*/
 #define CYCLE_S 60
 //#define USE_WDT
-//#define USE_SLEEP
+#define USE_SLEEP
 
 #endif /* DEF_H_ */
