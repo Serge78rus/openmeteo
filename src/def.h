@@ -11,7 +11,8 @@
 
 #define VERSION 0x0101
 #define LOGO_DELAY_MS 1000
-#define CYCLE_S 5/*TODO temp*/
+//#define CYCLE_S 5/*TODO temp*/
+#define CYCLE_S 60
 //#define USE_WDT
 //#define USE_SLEEP
 
