@@ -88,7 +88,7 @@ bool am2301_update(void)
 	timeout_flag = false;
 
 	EIFR = (1 << INTF0); // INTF0: External Interrupt Flag 0 (write 1 - clear flag)
-	EIMSK = (1 << INT0); // INT0: External Interrupt Request 0 Enable (enable)
+	EIMSK |= (1 << INT0); // INT0: External Interrupt Request 0 Enable (enable)
 
 #if defined USE_TIMER_0
 	TIFR0 = (1 << TOV0); // TOV0: Timer/Counter0 Overflow Flag (write 1 - clear flag)
@@ -130,7 +130,7 @@ bool am2301_update(void)
 #elif defined USE_TIMER_2
 	TIMSK2 = (0 << TOIE2); // Timer/Counter2 Overflow Interrupt Enable (disable)
 #endif
-	EIMSK = (0 << INT0); // INT0: External Interrupt Request 0 Enable (disable)
+	EIMSK &= ~(1 << INT0); // INT0: External Interrupt Request 0 Enable (disable)
 
 	/* for debug
 	for (int i = 0; i < sizeof(data) / sizeof(data[0]); ++i) {

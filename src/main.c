@@ -26,6 +26,7 @@
 #include "am2301.h"
 #include "twi.h"
 #include "bmp180.h"
+#include "pwm.h"
 
 #define DISPLAY_LINE_LEN 16
 
@@ -48,6 +49,7 @@ int main(void) {
 	am2301_init();
 	twi_init();
 	bmp180_init();
+	pwm_init();
 
 #ifdef USE_SLEEP
 	set_sleep_mode(SLEEP_MODE_IDLE);
