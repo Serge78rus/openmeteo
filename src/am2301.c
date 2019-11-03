@@ -38,7 +38,7 @@ void am2301_init(void)
 	//configure GPIO
 	PORTD &= ~(1 << am2301_BIT); //GPIO output LOW (no pullup input)
 	DDRD &= ~(1 << am2301_BIT); //GPIO mode input
-	EICRA = //External Interrupt Control Register A
+	EICRA |= //External Interrupt Control Register A
 			(0 << ISC11) | (0 << ISC10) | // ISC11, ISC10: Interrupt Sense Control 1 Bit 1 and Bit 0
 			(0 << ISC01) | (1 << ISC00); // ISC01, ISC00: Interrupt Sense Control 0 Bit 1 and Bit 0
 										//(Any logical change on INT0 generates an interrupt request)
