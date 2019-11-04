@@ -10,6 +10,7 @@
 #define LCD_H_
 
 #include <stdio.h>
+#include <stdint.h>
 
 /*
  * LCD 1602
@@ -35,6 +36,15 @@ void lcd_clear(void); //after clear cursor automatic moved to home
 void lcd_home(void);
 void lcd_move_cursor(uint8_t col, uint8_t row);
 void lcd_fill_space(uint8_t cnt);
+
+void lcd_show_temp(char sign, int16_t int_part, int16_t fract_part);
+void lcd_show_bad_temp(void);
+void lcd_show_hum(uint16_t int_part, uint16_t fract_part);
+void lcd_show_bad_hum(void);
+void lcd_show_press(int16_t int_part, int16_t fract_part);
+void lcd_show_bad_press(void);
+void lcd_show_diff(char sign, int16_t int_part, int16_t fract_part);
+void lcd_show_bad_diff(void);
 
 extern FILE lcd;
 

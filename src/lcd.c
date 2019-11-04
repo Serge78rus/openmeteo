@@ -9,8 +9,25 @@
 #include <stdint.h>
 #include <avr/io.h>
 #include <util/delay.h>
+#include <avr/pgmspace.h>
 
 #include "lcd.h"
+
+#define LINE_LEN 16
+
+#define TEMP_COL 0
+#define TEMP_ROW 0
+#define HUM_COL 10
+#define HUM_ROW 0
+#define PRESS_COL 0
+#define PRESS_ROW 1
+#define DIFF_COL 8
+#define DIFF_ROW 1
+
+#define TEMP_LEN (HUM_COL)
+#define HUM_LEN (LINE_LEN - HUM_COL)
+#define PRESS_LEN (DIFF_COL)
+#define DIFF_LEN (LINE_LEN - DIFF_COL)
 
 // commands
 #define CLEARDISPLAY	0x01
@@ -118,6 +135,111 @@ void lcd_fill_space(uint8_t cnt)
 	while (cnt--) {
 		lcd_putchar(' ', &lcd);
 	}
+}
+
+void lcd_show_temp(char sign, int16_t int_part, int16_t fract_part)
+{
+	static const char FMT_STR[] PROGMEM = "%c%i.%01i""\xdf""C";
+
+	lcd_move_cursor(TEMP_COL, TEMP_ROW);
+	int len = fprintf_P(&lcd, FMT_STR, sign, int_part, fract_part);
+	if (len < TEMP_LEN) {
+		lcd_fill_space(TEMP_LEN - len);
+	}
+}
+
+void lcd_show_bad_temp(void)
+{
+	static const char FMT_STR[] PROGMEM = "---""\xdf""C";
+
+	lcd_move_cursor(TEMP_COL, TEMP_ROW);
+	int len = fprintf_P(&lcd, FMT_STR);
+	if (len < TEMP_LEN) {
+		lcd_fill_space(TEMP_LEN - len);
+	}
+}
+
+void lcd_show_hum(uint16_t int_part, uint16_t fract_part)
+{
+	static const char FMT_STR[] PROGMEM = "%3u.%01u%%";
+
+	lcd_move_cursor(HUM_COL, HUM_ROW);
+	int len = fprintf_P(&lcd, FMT_STR, int_part, fract_part);
+	if (len < HUM_LEN) {
+		lcd_fill_space(HUM_LEN - len);
+	}
+}
+
+void lcd_show_bad_hum(void)
+{
+	static const char FMT_STR[] PROGMEM = "---%%";
+
+	lcd_move_cursor(HUM_COL, HUM_ROW);
+	int len = fprintf_P(&lcd, FMT_STR);
+	if (len < HUM_LEN) {
+		lcd_fill_space(HUM_LEN - len);
+	}
+}
+
+void lcd_show_press(int16_t int_part, int16_t fract_part)
+{
+	static const char FMT_STR[] PROGMEM = "%i.%01imm";
+
+	lcd_move_cursor(PRESS_COL, PRESS_ROW);
+	int len = fprintf_P(&lcd, FMT_STR, int_part, fract_part);
+	if (len < PRESS_LEN) {
+		lcd_fill_space(PRESS_LEN - len);
+	}
+}
+
+void lcd_show_bad_press(void)
+{
+	static const char FMT_STR[] PROGMEM = "---mm";
+
+	lcd_move_cursor(PRESS_COL, PRESS_ROW);
+	int len = fprintf_P(&lcd, FMT_STR);
+	if (len < PRESS_LEN) {
+		lcd_fill_space(PRESS_LEN - len);
+	}
+}
+
+void lcd_show_diff(char sign, int16_t int_part, int16_t fract_part)
+{
+	static const char FMT_STR[] PROGMEM = "%c%i.%02i/h";
+	static const char NULL_FMT_STR[] PROGMEM = " stable";
+
+	lcd_move_cursor(DIFF_COL, DIFF_ROW);
+
+	//int len = 0;
+	if (int_part < 10) {
+		lcd_fill_space(1);
+		//len = 1;
+	}
+
+	if (int_part || fract_part) {
+		/*len +=*/ fprintf_P(&lcd, FMT_STR, sign, int_part, fract_part);
+	} else {
+		/*len +=*/ fprintf_P(&lcd, NULL_FMT_STR);
+	}
+
+	/*
+	if (len < DIFF_LEN) {
+		lcd_fill_space(DIFF_LEN - len);
+	}
+	*/
+}
+
+void lcd_show_bad_diff(void)
+{
+	static const char FMT_STR[] PROGMEM = "   ---/h";
+
+	lcd_move_cursor(DIFF_COL, DIFF_ROW);
+	/*int len =*/ fprintf_P(&lcd, FMT_STR);
+	/*
+	if (len < DIFF_LEN) {
+		lcd_fill_space(DIFF_LEN - len);
+	}
+	*/
 }
 
 /*

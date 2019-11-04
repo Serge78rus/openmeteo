@@ -13,7 +13,6 @@
 #include <avr/wdt.h>
 #include <avr/pgmspace.h>
 #include <avr/sleep.h>
-//#include <avr/interrupt.h>
 #include <util/delay.h>
 #include <util/atomic.h>
 
@@ -28,8 +27,6 @@
 #include "bmp180.h"
 #include "pwm.h"
 #include "diff.h"
-
-#define DISPLAY_LINE_LEN 16
 
 static inline void show_logo(void);
 static void cycle(void);
@@ -103,64 +100,74 @@ static inline void show_logo(void)
 
 static void cycle(void)
 {
-	static const char TEMP_RH_FMT_STR[] PROGMEM = "%c%i.%01i""\xdf""C   %3u.%01u%%";
-	static const char PRESS_DIFF_FMT_STR[] PROGMEM = "%i.%02imm %c%i.%02i/h";
-	static const char PRESS_FMT_STR[] PROGMEM = "%i.%02imm";
-	static const char ERROR_STR[] PROGMEM = "Error";
-
 	TRACEF("%s", "cycle");
 
-	lcd_move_cursor(0, 0);
 	if (am2301_update()) {
 
 		uint16_t hum = am2301_get_humidity();
 		int16_t temp = am2301_get_temp();
-		bool neg_temp = false;
+
+		char temp_sign;
 		if (temp < 0) {
 			temp = -temp;
-			neg_temp = true;
+			temp_sign = '-';
+		} else {
+			temp_sign = '+';
 		}
-		int len = fprintf_P(&lcd, TEMP_RH_FMT_STR,
-				neg_temp ? '-' : '+',
-				temp / 10, temp % 10,
-				hum / 10, hum % 10);
-		if (len > 0) {
-			lcd_fill_space(DISPLAY_LINE_LEN - len);
-		}
+
+		int16_t temp_int = temp / 10;
+		int16_t temp_fract = temp % 10;
+		uint16_t hum_int = hum / 10;
+		uint16_t hum_fract = hum % 10;
+
+		lcd_show_temp(temp_sign, temp_int, temp_fract);
+		lcd_show_hum(hum_int, hum_fract);
 		//todo fprintf(&uart, ...
 	} else {
-		int len = fprintf_P(&lcd, ERROR_STR);
-		lcd_fill_space(DISPLAY_LINE_LEN - len);
+		lcd_show_bad_temp();
+		lcd_show_bad_hum();
 		//todo fprintf(&uart, ...
 	}
 
-	lcd_move_cursor(0, 1);
 	if (bmp180_update(bmp180_MODE_ULTRA_HIGH_RESOLUTION)) {
 
 		int32_t press = bmp180_get_press_mm();
 		diff_put(press);
-		int32_t diff = diff_calc();
-		bool neg_diff = false;
-		if (diff < 0 && diff != BAD_INT32) { //todo check in other place
-			diff = -diff;
-			neg_diff = true;
-		}
-		int len = diff && diff != BAD_INT32 ?
-				fprintf_P(&lcd, PRESS_DIFF_FMT_STR,
-				(int)(press / 100), (int)(press % 100),
-				neg_diff ? '-' : '+',
-				(int)(diff / 100), (int)(diff % 100)):
-				fprintf_P(&lcd, PRESS_FMT_STR,
-				(int)(press / 100), (int)(press % 100));
-		if (len > 0) {
-			lcd_fill_space(DISPLAY_LINE_LEN - len);
-		}
+
+		press = (press + 5) / 10;
+		int16_t press_int = press / 10;
+		int16_t press_fract = press % 10;
+
+		lcd_show_press(press_int, press_fract);
 		//todo fprintf(&uart, ...
+
 	} else {
 		diff_put(BAD_INT32);
-		int len = fprintf_P(&lcd, ERROR_STR);
-		lcd_fill_space(DISPLAY_LINE_LEN - len);
+		lcd_show_bad_press();
 		//todo fprintf(&uart, ...
 	}
+
+	int32_t diff = diff_calc();
+	if (diff != BAD_INT32) {
+
+		char diff_sign;
+		if (diff < 0) {
+			diff = -diff;
+			diff_sign = '-';
+		} else {
+			diff_sign = '+';
+		}
+
+		int16_t diff_int = diff / 10;
+		int16_t diff_fract = diff % 10;
+
+		lcd_show_diff(diff_sign, diff_int, diff_fract);
+		//todo fprintf(&uart, ...
+
+	} else {
+		lcd_show_bad_diff();
+		//todo fprintf(&uart, ...
+	}
+	//todo fprintf(&uart, newlinw
 }
 
