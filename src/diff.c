@@ -58,7 +58,7 @@ uint32_t diff_calc(void)
 		}
 	}
 
-	if (last_cnt && prev_cnt) {
+	if (last_cnt == BUFF_SIZE / 2 && prev_cnt == BUFF_SIZE / 2) {
 		return (last_sum / last_cnt) - (prev_sum / prev_cnt);
 	} else {
 		return BAD_INT32;
