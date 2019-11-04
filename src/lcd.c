@@ -210,6 +210,7 @@ void lcd_show_diff(char sign, int16_t int_part, int16_t fract_part)
 
 	lcd_move_cursor(DIFF_COL, DIFF_ROW);
 
+	//TODO clear unused code
 	//int len = 0;
 	if (int_part < 10) {
 		lcd_fill_space(1);
@@ -234,6 +235,7 @@ void lcd_show_bad_diff(void)
 	static const char FMT_STR[] PROGMEM = "   ---/h";
 
 	lcd_move_cursor(DIFF_COL, DIFF_ROW);
+	//TODO clear unused code
 	/*int len =*/ fprintf_P(&lcd, FMT_STR);
 	/*
 	if (len < DIFF_LEN) {

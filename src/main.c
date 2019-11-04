@@ -122,11 +122,16 @@ static void cycle(void)
 
 		lcd_show_temp(temp_sign, temp_int, temp_fract);
 		lcd_show_hum(hum_int, hum_fract);
-		//todo fprintf(&uart, ...
+		static const char FMT_STR[] PROGMEM = "t=%c%i.%01i h=%u.%01u ";
+		fprintf_P(&uart, FMT_STR,
+				temp_sign, temp_int, temp_fract,
+				hum_int, hum_fract);
+
 	} else {
 		lcd_show_bad_temp();
 		lcd_show_bad_hum();
-		//todo fprintf(&uart, ...
+		static const char FMT_STR[] PROGMEM = "t=error h=error ";
+		fprintf_P(&uart, FMT_STR);
 	}
 
 	if (bmp180_update(bmp180_MODE_ULTRA_HIGH_RESOLUTION)) {
@@ -139,12 +144,15 @@ static void cycle(void)
 		int16_t press_fract = press % 10;
 
 		lcd_show_press(press_int, press_fract);
-		//todo fprintf(&uart, ...
+		static const char FMT_STR[] PROGMEM = "p=%i.%01i\r\n";
+		fprintf_P(&uart, FMT_STR,
+				press_int, press_fract);
 
 	} else {
 		diff_put(BAD_INT32);
 		lcd_show_bad_press();
-		//todo fprintf(&uart, ...
+		static const char FMT_STR[] PROGMEM = "p=error\r\n";
+		fprintf_P(&uart, FMT_STR);
 	}
 
 	int32_t diff = diff_calc();
@@ -158,16 +166,13 @@ static void cycle(void)
 			diff_sign = '+';
 		}
 
-		int16_t diff_int = diff / 10;
-		int16_t diff_fract = diff % 10;
+		int16_t diff_int = diff / 100;
+		int16_t diff_fract = diff % 100;
 
 		lcd_show_diff(diff_sign, diff_int, diff_fract);
-		//todo fprintf(&uart, ...
 
 	} else {
 		lcd_show_bad_diff();
-		//todo fprintf(&uart, ...
 	}
-	//todo fprintf(&uart, newlinw
 }
 

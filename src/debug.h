@@ -11,7 +11,7 @@
 /*
  * Debug flag, uncomment it for debug trace to uart
  */
-#define _DEBUG
+//#define _DEBUG
 
 #ifdef _DEBUG
 
