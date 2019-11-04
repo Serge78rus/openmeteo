@@ -27,6 +27,7 @@
 #include "twi.h"
 #include "bmp180.h"
 #include "pwm.h"
+#include "diff.h"
 
 #define DISPLAY_LINE_LEN 16
 
@@ -50,6 +51,7 @@ int main(void) {
 	twi_init();
 	bmp180_init();
 	pwm_init();
+	diff_init();
 
 #ifdef USE_SLEEP
 	set_sleep_mode(SLEEP_MODE_IDLE);
@@ -102,6 +104,7 @@ static inline void show_logo(void)
 static void cycle(void)
 {
 	static const char TEMP_RH_FMT_STR[] PROGMEM = "%c%i.%01i""\xdf""C   %3u.%01u%%";
+	static const char PRESS_DIFF_FMT_STR[] PROGMEM = "%i.%02imm %c%i.%02i/h";
 	static const char PRESS_FMT_STR[] PROGMEM = "%i.%02imm";
 	static const char ERROR_STR[] PROGMEM = "Error";
 
@@ -135,13 +138,26 @@ static void cycle(void)
 	if (bmp180_update(bmp180_MODE_ULTRA_HIGH_RESOLUTION)) {
 
 		int32_t press = bmp180_get_press_mm();
-		int len = fprintf_P(&lcd, PRESS_FMT_STR,
+		diff_put(press);
+		int32_t diff = diff_calc();
+		bool neg_diff = false;
+		if (diff < 0 && diff != BAD_INT32) { //todo check in other place
+			diff = -diff;
+			neg_diff = true;
+		}
+		int len = diff && diff != BAD_INT32 ?
+				fprintf_P(&lcd, PRESS_DIFF_FMT_STR,
+				(int)(press / 100), (int)(press % 100),
+				neg_diff ? '-' : '+',
+				(int)(diff / 100), (int)(diff % 100)):
+				fprintf_P(&lcd, PRESS_FMT_STR,
 				(int)(press / 100), (int)(press % 100));
 		if (len > 0) {
 			lcd_fill_space(DISPLAY_LINE_LEN - len);
 		}
 		//todo fprintf(&uart, ...
 	} else {
+		diff_put(BAD_INT32);
 		int len = fprintf_P(&lcd, ERROR_STR);
 		lcd_fill_space(DISPLAY_LINE_LEN - len);
 		//todo fprintf(&uart, ...
