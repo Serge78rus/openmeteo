@@ -11,8 +11,17 @@
 
 #include <stdio.h>
 
+#include <avr/io.h>
+
 void uart_init(void);
+inline void uart_wait_empty(void);
 
 extern FILE uart;
+
+inline void uart_wait_empty(void)
+{
+	while (!(UCSR0A & (1 << UDRE0))) { //Wait for empty transmit buffer
+	}
+}
 
 #endif /* UART_H_ */

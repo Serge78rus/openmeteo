@@ -198,6 +198,8 @@ static void cycle(void)
 #ifdef USE_SLEEP
 	PRR |= (1 << PRTWI); // PRTWI: Power Reduction TWI
 #ifndef _DEBUG
+	uart_wait_empty();
+	_delay_ms(2);
 	PRR |= (1 << PRUSART0); // PRUSART0: Power Reduction USART0
 #endif
 #endif
