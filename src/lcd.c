@@ -210,24 +210,15 @@ void lcd_show_diff(char sign, int16_t int_part, int16_t fract_part)
 
 	lcd_move_cursor(DIFF_COL, DIFF_ROW);
 
-	//TODO clear unused code
-	//int len = 0;
 	if (int_part < 10) {
 		lcd_fill_space(1);
-		//len = 1;
 	}
 
 	if (int_part || fract_part) {
-		/*len +=*/ fprintf_P(&lcd, FMT_STR, sign, int_part, fract_part);
+		fprintf_P(&lcd, FMT_STR, sign, int_part, fract_part);
 	} else {
-		/*len +=*/ fprintf_P(&lcd, NULL_FMT_STR);
+		fprintf_P(&lcd, NULL_FMT_STR);
 	}
-
-	/*
-	if (len < DIFF_LEN) {
-		lcd_fill_space(DIFF_LEN - len);
-	}
-	*/
 }
 
 void lcd_show_bad_diff(void)
@@ -235,13 +226,7 @@ void lcd_show_bad_diff(void)
 	static const char FMT_STR[] PROGMEM = "   ---/h";
 
 	lcd_move_cursor(DIFF_COL, DIFF_ROW);
-	//TODO clear unused code
-	/*int len =*/ fprintf_P(&lcd, FMT_STR);
-	/*
-	if (len < DIFF_LEN) {
-		lcd_fill_space(DIFF_LEN - len);
-	}
-	*/
+	fprintf_P(&lcd, FMT_STR);
 }
 
 /*

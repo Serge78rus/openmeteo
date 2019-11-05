@@ -17,10 +17,9 @@
 #define BAD_INT16 SHRT_MIN
 #define BAD_INT32 LONG_MIN
 
-//#define CYCLE_S 5/*TODO temp*/
 #define CYCLE_S 60
 
-//#define USE_WDT
+#define USE_WDT
 #define USE_SLEEP
 
 #endif /* DEF_H_ */

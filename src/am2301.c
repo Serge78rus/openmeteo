@@ -13,6 +13,7 @@
 
 #include "am2301.h"
 #include "debug.h"
+#include "def.h"
 
 #define START_PULSE_US 1000
 //TIME_THRESHOLD = 50us (short pulse = 27us, long pulse = 70us)
@@ -54,6 +55,10 @@ void am2301_init(void)
 			(0 << FOC0B) | // FOC0B: Force Output Compare B
 			(0 << WGM02) | // WGM02: Waveform Generation Mode (normal mode)
 			(0 << CS02) | (1 << CS01) | (0 << CS00); // CS02:0: Clock Select (clkT2S/8 (From prescaler))
+#ifdef USE_SLEEP
+	PRR |= // Power Reduction Register
+			(1 << PRTIM0); // PRTIM0: Power Reduction Timer/Counter0
+#endif
 #elif defined USE_TIMER_2
 	//configure TIMER2
 	TCCR2A = //Timer/Counter Control Register A
@@ -65,6 +70,10 @@ void am2301_init(void)
 			(0 << FOC2B) | // FOC2B: Force Output Compare B
 			(0 << WGM22) | // WGM22: Waveform Generation Mode (normal mode)
 			(0 << CS22) | (1 << CS21) | (0 << CS20); // CS22:0: Clock Select (clkT2S/8 (From prescaler))
+#ifdef USE_SLEEP
+	PRR |= // Power Reduction Register
+			(1 << PRTIM2); // PRTIM0: Power Reduction Timer/Counter0
+#endif
 #else
 #error "No timer selected"
 #endif
@@ -80,8 +89,14 @@ bool am2301_update(void)
 	DDRD &= ~(1 << am2301_BIT); //GPIO mode input (compile to atomic command)
 
 #if defined USE_TIMER_0
+#ifdef USE_SLEEP
+	PRR &= ~(1 << PRTIM0); // PRTIM0: Power Reduction Timer/Counter0
+#endif
 	TCNT0 = 0;
 #elif defined USE_TIMER_2
+#ifdef USE_SLEEP
+	PRR &= ~(1 << PRTIM2); // PRTIM0: Power Reduction Timer/Counter0
+#endif
 	TCNT2 = 0;
 #endif
 	duration = 0;
@@ -127,8 +142,14 @@ bool am2301_update(void)
 
 #if defined USE_TIMER_0
 	TIMSK0 = (0 << TOIE0); // Timer/Counter0 Overflow Interrupt Enable (disable)
+#ifdef USE_SLEEP
+	PRR |= (1 << PRTIM0); // PRTIM0: Power Reduction Timer/Counter0
+#endif
 #elif defined USE_TIMER_2
 	TIMSK2 = (0 << TOIE2); // Timer/Counter2 Overflow Interrupt Enable (disable)
+#ifdef USE_SLEEP
+	PRR |= (1 << PRTIM2); // PRTIM0: Power Reduction Timer/Counter0
+#endif
 #endif
 	EIMSK &= ~(1 << INT0); // INT0: External Interrupt Request 0 Enable (disable)
 

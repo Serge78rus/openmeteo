@@ -51,6 +51,19 @@ int main(void) {
 	diff_init();
 
 #ifdef USE_SLEEP
+	PRR = // Power Reduction Register
+			(1 << PRTWI) | // PRTWI: Power Reduction TWI
+			(0 << PRTIM2) | // PRTIM2: Power Reduction Timer/Counter2
+			(0 << PRTIM0) | // PRTIM0: Power Reduction Timer/Counter0
+			(0 << PRTIM1) | // PRTIM1: Power Reduction Timer/Counter1
+			(1 << PRSPI) | // PRSPI: Power Reduction Serial Peripheral Interface
+#ifdef _DEBUG
+			(0 << PRUSART0) | // PRUSART0: Power Reduction USART0
+#else
+			(1 << PRUSART0) | // PRUSART0: Power Reduction USART0
+#endif
+			(1 << PRADC); // PRADC: Power Reduction ADC
+
 	set_sleep_mode(SLEEP_MODE_IDLE);
 #endif
 
@@ -101,6 +114,13 @@ static inline void show_logo(void)
 static void cycle(void)
 {
 	TRACEF("%s", "cycle");
+
+#ifdef USE_SLEEP
+	PRR &= ~(1 << PRTWI); // PRTWI: Power Reduction TWI
+#ifndef _DEBUG
+	PRR &= ~(1 << PRUSART0); // PRUSART0: Power Reduction USART0
+#endif
+#endif
 
 	if (am2301_update()) {
 
@@ -174,5 +194,13 @@ static void cycle(void)
 	} else {
 		lcd_show_bad_diff();
 	}
+
+#ifdef USE_SLEEP
+	PRR |= (1 << PRTWI); // PRTWI: Power Reduction TWI
+#ifndef _DEBUG
+	PRR |= (1 << PRUSART0); // PRUSART0: Power Reduction USART0
+#endif
+#endif
+
 }
 
